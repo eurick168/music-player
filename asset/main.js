@@ -23,10 +23,14 @@ const getPlayer = $(".player");
 const getrange = $(".progress");
 const getNextBtn = $(".btn-next");
 const getprevBtn = $(".btn-prev");
+const randomBtn = $(".btn-random");
+const repeatBtn = $(".btn-repeat");
 
 const appPlayer = {
   currentIndex: 0,
   isPlaying: false,
+  isRandom: false,
+  isRepeat: false,
 
   songs: [
     {
@@ -87,9 +91,9 @@ const appPlayer = {
   ],
 
   render() {
-    const htmls = this.songs.map((song) => {
+    const htmls = this.songs.map((song, index) => {
       return `
-              <div class="song">
+              <div class="song ${index === this.currentIndex ? "active" : ""} " data-index="${index}">
                   <div class="thumb" style="background-image: url('${song.image}')"></div>
                       <div class="body">
                           <h3 class="title">${song.name}</h3>
@@ -135,6 +139,23 @@ const appPlayer = {
     this.loadCurrentSong();
   },
 
+  // function random songs
+
+  randomSong() {
+    let newIndex;
+
+    do {
+      newIndex = Math.floor(Math.random() * this.songs.length);
+    } while (newIndex === this.currentIndex);
+
+    this.currentIndex = newIndex;
+    this.loadCurrentSong();
+  },
+
+  // function srollview active song
+
+  // function Handle
+
   handleEvent() {
     _this = this;
     const cdWidth = getCd.offsetWidth;
@@ -142,13 +163,24 @@ const appPlayer = {
     // nextSong
 
     getNextBtn.onclick = function () {
-      _this.nextSong();
+      if (_this.isRandom) {
+        _this.randomSong();
+      } else {
+        _this.nextSong();
+      }
       getAudio.play();
+      _this.render();
     };
 
     getprevBtn.onclick = function () {
-      _this.prevSong();
+      if (_this.isRandom) {
+        _this.randomSong();
+      } else {
+        _this.prevSong();
+      }
+
       getAudio.play();
+      _this.render();
     };
 
     // handle rotate cd
@@ -172,6 +204,7 @@ const appPlayer = {
       const srcollTop = window.scrollY || document.documentElement.scrollTop;
       const newWidth = cdWidth - srcollTop;
       getCd.style.width = newWidth > 0 ? newWidth + "px" : 0;
+      getCd.style.opacity = newWidth / cdWidth;
     };
 
     // handle when we click play button
@@ -208,6 +241,43 @@ const appPlayer = {
     getrange.oninput = function (e) {
       const seekTime = (getAudio.duration / 100) * e.target.value;
       audio.currentTime = seekTime;
+    };
+
+    // switch btn random
+
+    randomBtn.onclick = function () {
+      _this.isRandom = !_this.isRandom;
+      randomBtn.classList.toggle("active", _this.isRandom);
+    };
+
+    // handle next song when song is ended
+    audio.onended = function () {
+      if (_this.isRepeat) {
+        audio.play();
+      } else {
+        getNextBtn.click();
+      }
+    };
+
+    // repeat song when we click
+
+    repeatBtn.onclick = function () {
+      _this.isRepeat = !_this.isRepeat;
+      repeatBtn.classList.toggle("active", _this.isRepeat);
+    };
+
+    //listen event click to playlist
+
+    getPlaylist.onclick = function (e) {
+      const songNode = e.target.closest(".song:not(.active)");
+      if (e.target.closest(".song:not(.active)") || e.target.closest(".option")) {
+        if (songNode) {
+          _this.currentIndex = Number(songNode.getAttribute("data-index"));
+          _this.loadCurrentSong();
+          _this.render();
+          getAudio.play();
+        }
+      }
     };
   },
 
