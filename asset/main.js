@@ -34,6 +34,12 @@ const appPlayer = {
 
   songs: [
     {
+      name: "Dạ Vũ",
+      singer: "Tăng Duy Tân",
+      path: "./asset/music/DẠ VŨ - TĂNG DUY TÂN.mp3",
+      image: "./asset/img/tăng-duy-tân.jpg",
+    },
+    {
       name: "Despacito",
       singer: "Luis Fonsi",
       path: "./asset/music/Despacito - Luis Fonsi.mp3",
