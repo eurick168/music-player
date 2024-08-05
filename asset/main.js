@@ -31,7 +31,7 @@ const appPlayer = {
   isPlaying: false,
   isRandom: false,
   isRepeat: false,
-
+  playedIndices: [],
   songs: [
     {
       name: "Dạ Vũ",
@@ -105,14 +105,23 @@ const appPlayer = {
                           <h3 class="title">${song.name}</h3>
                           <p class="author">${song.singer}</p>
                       </div>
-                      <div class="option">
-                          <i class="fas fa-ellipsis-h"></i>
-                      </div>
+                 
                   </div>
               </div>
           `;
     });
     getPlaylist.innerHTML = htmls.join("");
+  },
+
+  updateActiveClass() {
+    const songNodes = $$(".song");
+    songNodes.forEach((songNode, index) => {
+      if (index === this.currentIndex) {
+        songNode.classList.add("active");
+      } else {
+        songNode.classList.remove("active");
+      }
+    });
   },
 
   defineProperties() {
@@ -135,6 +144,7 @@ const appPlayer = {
       this.currentIndex = 0;
     }
     this.loadCurrentSong();
+    this.updateActiveClass();
   },
 
   prevSong() {
@@ -143,19 +153,26 @@ const appPlayer = {
       this.currentIndex = this.songs.length - 1;
     }
     this.loadCurrentSong();
+    this.updateActiveClass();
   },
 
   // function random songs
 
   randomSong() {
+    if (this.playedIndices.length === this.songs.length) {
+      this.playedIndices = [];
+    }
+
     let newIndex;
 
     do {
       newIndex = Math.floor(Math.random() * this.songs.length);
-    } while (newIndex === this.currentIndex);
+    } while (this.playedIndices.includes(newIndex));
 
+    this.playedIndices.push(newIndex);
     this.currentIndex = newIndex;
     this.loadCurrentSong();
+    this.updateActiveClass();
   },
 
   // function srollview active song
@@ -175,7 +192,6 @@ const appPlayer = {
         _this.nextSong();
       }
       getAudio.play();
-      _this.render();
     };
 
     getprevBtn.onclick = function () {
@@ -186,7 +202,6 @@ const appPlayer = {
       }
 
       getAudio.play();
-      _this.render();
     };
 
     // handle rotate cd
@@ -292,6 +307,7 @@ const appPlayer = {
     this.render();
     this.handleEvent();
     this.loadCurrentSong();
+    this.updateActiveClass();
   },
 };
 
